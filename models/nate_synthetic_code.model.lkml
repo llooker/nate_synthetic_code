@@ -1,31 +1,27 @@
 connection: "gcp_hca_poc"
 
 # # include all the views
-# include: "/views/**/*.view"
+include: "/views/**/*.view"
 
-# explore: beds {
-#   view_label: "Beds"
+explore: beds {
+  view_label: "Beds"
 
-#   sql_always_where: NOT (${beds.room_overflow} = 1 and ${pat.accid} is null)  ;;
+  sql_always_where: NOT (${beds.room_overflow} = 1 and ${pat.accid} is null)  ;;
 
-#   join: pat {
-#     view_label: "Patients"
-#     relationship: one_to_one
-#     sql_on:
-#           ${beds.timestamp_raw} = ${pat.timestamp_raw}
-#       AND rtrim(${beds.facility}) =
-#         case
-#           when left(rtrim(${pat.facility},5) = 'COCWM' then 'COCWM'
-#           else rtrim(${pat.facility}
-#         end
-#       AND rtrim(${beds.roomname} || '-' || ${beds.roombed}) = rtrim(${pat.roombed})
-#     ;;
-#     sql_where:
-#           ${pat.dis_time} is null
-#       AND ${pat.pat_status} in ('ADM IN', 'PRE ER', 'REG ER', 'REG CLI', 'REG RCR', 'REG SDC')
-#       AND ${pat.patient_row_number} = 1
-#       ;;
-#   }
+  join: pat {
+    view_label: "Patients"
+    relationship: one_to_one
+    sql_on:
+           ${beds.timestamp_raw} = ${pat.timestamp_raw}
+       AND rtrim(${beds.facility}) = ${pat.facility_join}
+       AND rtrim(${beds.roomname} || '-' || ${beds.roombed}) = rtrim(${pat.roombed})
+     ;;
+    sql_where:
+          ${pat.dis_time_raw} is null
+      AND ${pat.pat_status} in ('ADM IN', 'PRE ER', 'REG ER', 'REG CLI', 'REG RCR', 'REG SDC')
+      AND ${pat.patient_row_number} = 1
+      ;;
+  }
 
 #   join: dcorders {
 #     view_label: "DC Orders"
@@ -51,7 +47,7 @@ connection: "gcp_hca_poc"
 #     relationship: one_to_one
 #     sql_on: 1 = 1  ;;
 #   }
-# }
+}
 
 # # Facility facility_length
 # # case when  charindex('-', pat.facility ) = 0 then len(pat.facility) else charindex('-', pat.facility, 1) -1 end)
