@@ -1,5 +1,5 @@
 view: pat {
-  sql_table_name:  ;;
+  sql_table_name: [DATA_SOURCE].[dbo].[nv_patDetail] ;;
 
 #######################
 ### Original Dimensions
@@ -21,7 +21,7 @@ view: pat {
       quarter,
       year
     ]
-    sql: ${TABLE}.dis_time ;;
+    sql: ${TABLE}.disTime ;;
   }
 
   dimension: facility {
@@ -29,14 +29,33 @@ view: pat {
     sql: ${TABLE}.facility ;;
   }
 
+  dimension_group: last_update {
+    type: time
+    timeframes: [
+      raw,
+      time,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    sql: ${TABLE}.lastUpdate ;;
+  }
+
   dimension: pat_status {
     type: string
-    sql: ${TABLE}.pat_status ;;
+    sql: ${TABLE}.patStatus ;;
   }
 
   dimension: patient_row_number {
     type: string
     sql: ${TABLE}.patient_row_number ;;
+  }
+
+  dimension: pat_urn {
+    type: string
+    sql: ${TABLE}.patURN ;;
   }
 
   dimension: roombed {
@@ -72,9 +91,18 @@ view: pat {
     ;;
   }
 
+  dimension: facility_length {
+    type: string
+    sql: case when charindex('-', ${facility}) = 0 then len(${facility}) else charindex('-', ${facility}, 1) -1 end) ;;
+  }
+
 #######################
 ### Measures
 #######################
 
+  measure: max_last_update {
+    type: time
+    sql: max(${last_update_raw}) ;;
+  }
 
 }

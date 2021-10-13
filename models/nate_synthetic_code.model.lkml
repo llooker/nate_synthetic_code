@@ -6,7 +6,18 @@ include: "/views/**/*.view"
 explore: beds {
   view_label: "Beds"
 
-  sql_always_where: NOT (${beds.room_overflow} = 1 and ${pat.accid} is null)  ;;
+  sql_always_where:
+    NOT (${beds.room_overflow} = 1 and ${pat.accid} is null)
+    AND
+      {% if analytics.real_time_vs_historical._parameter_value == 'real_time' %} ${update_time.latest_time} is not null
+      {% elsif analytics.real_time_vs_historical._parameter_value == 'historical' %} 1 = 1
+      {% else %} ${update_time.latest_time} is not null
+      {% endif %}
+  ;;
+
+  always_filter: {
+    filters: [analytics.real_time_vs_historical: "real^_time"]
+  }
 
   join: pat {
     view_label: "Patients"
@@ -23,54 +34,42 @@ explore: beds {
       ;;
   }
 
-#   join: dcorders {
-#     view_label: "DC Orders"
-#     relationship: one_to_one
-#     sql_on:
-#           ${beds.timestamp_raw} = ${dcorders.timestamp_raw}
-#       AND left(${pat.facility}, ${pat.facility_length}) = left(${dcorders.facility},${dcorders.facility_length})
-#       AND ${pat.pat_urn}=${dcorders.pat_urn}
-#     ;;
-#   }
+  join: dcorders {
+    view_label: "DC Orders"
+    relationship: one_to_one
+    sql_on:
+          ${beds.timestamp_raw} = ${dcorders.timestamp_raw}
+      AND left(${pat.facility}, ${pat.facility_length}) = left(${dcorders.facility},${dcorders.facility_length})
+      AND ${pat.pat_urn}=${dcorders.pat_urn}
+    ;;
+  }
 
-#   join: nur {
-#     view_label: "Nurses"
-#     relationship: one_to_one
-#     sql_on:
-#           ${beds.timestamp_raw} = ${nur.timestamp_raw}
-#       AND ${pat.facility} = ${nur.facility}
-#       AND ${pat.pat_urn} = ${nur.pat_urn}
-#     ;;
-#   }
+  join: nur {
+    view_label: "Nurses"
+    relationship: one_to_one
+    sql_on:
+          ${beds.timestamp_raw} = ${nur.timestamp_raw}
+      AND ${pat.facility} = ${nur.facility}
+      AND ${pat.pat_urn} = ${nur.pat_urn}
+    ;;
+  }
 
-#   join: update_time {
-#     relationship: one_to_one
-#     sql_on: 1 = 1  ;;
-#   }
+  join: analytics {
+    relationship: one_to_one
+    sql: ;;
+  }
+
+  join: update_time {
+    relationship: one_to_one
+    sql_on: ${beds.timestamp_time} = ${update_time.latest_time} ;;
+  }
 }
 
-# # Facility facility_length
-# # case when  charindex('-', pat.facility ) = 0 then len(pat.facility) else charindex('-', pat.facility, 1) -1 end)
-
-# # Facility pat_URN
-# # patURN
-
-# # dcorders facility_length
-# # case when  charindex('-', dcorders.facility ) = 0 then len(dcorders.facility) else charindex('-', dcorders.facility, 1) -1 end)
-
-# # dcorders pat_URN
-# # patURN
-
-# # nurses pat_URN
-# # patURN
-
-# # patient dis_time
-# # pat.disTime
-
-# # pat pat_status
-# # pat.patStatus
-
-
+explore: beds_latest_time {
+  hidden: yes
+  from: beds
+  view_name: beds
+}
 
 # # SELECT
 # # FROM [DATA_SOURCE].[dbo].nv_BedsHCA beds

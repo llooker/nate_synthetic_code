@@ -1,5 +1,5 @@
 view: beds {
-  sql_table_name:  ;;
+  sql_table_name: [DATA_SOURCE].[dbo].nv_BedsHCA ;;
 
 #######################
 ### Original Dimensions
@@ -16,11 +16,13 @@ view: beds {
   }
 
   dimension: roombed {
+    label: "Room Bed"
     type: string
     sql: ${TABLE}.roombed ;;
   }
 
   dimension: roomname {
+    label: "Room Name"
     type: string
     sql: ${TABLE}.roomname ;;
   }
@@ -51,5 +53,8 @@ view: beds {
 ### Measures
 #######################
 
-
+  measure: latest_time {
+    type: date_time
+    sql: max(${timestamp_time}) ;;
+  }
 }
