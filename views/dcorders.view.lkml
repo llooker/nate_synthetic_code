@@ -5,6 +5,63 @@ view: dcorders {
 ### Original Dimensions
 #######################
 
+  dimension: discharge_order_conditions_physician {
+    type: string
+    sql: ${TABLE}.doWPdoc ;;
+  }
+
+  dimension_group: do_rtd {
+    type: time
+    timeframes: [
+      raw,
+      time,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    sql: ${TABLE}.doRTDtime ;;
+  }
+
+  dimension: do_rtd_nurse {
+    type: string
+    sql: ${TABLE}.doRTDnurse ;;
+  }
+
+  dimension_group: do_wp {
+    type: time
+    timeframes: [
+      raw,
+      time,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    sql: ${TABLE}.dowptime ;;
+  }
+
+  dimension: discharge_order_conditions {
+    type: string
+    sql: ${TABLE}.doWPConditions ;;
+  }
+
+  dimension_group: discharge_order_ts {
+    type: time
+    timeframes: [
+      raw,
+      time,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    sql: convert(varchar,${TABLE}.doUNCONDTime, 126)  ;;
+  }
+
   dimension: facility {
     type: string
     sql: ${TABLE}.facility ;;
@@ -36,6 +93,50 @@ view: dcorders {
   dimension: facility_length {
     type: string
     sql: case when charindex('-', ${facility}) = 0 then len(${facility}) else charindex('-', ${facility}, 1) -1 end) ;;
+  }
+
+  dimension: is_discharge_order {
+    type: yesno
+    sql:
+          (${discharge_order_ts_raw} is not null and ${do_wp_raw} is not null and ${discharge_order_ts_raw} > ${do_wp_raw})
+      OR  (${discharge_order_ts_raw} is not null and ${do_wp_raw} is null )
+    ;;
+  }
+
+  dimension: d_dis_order {
+    type: yesno
+    sql:
+          (${discharge_order_ts_raw} is not null and ${do_wp_raw} is not null and ${discharge_order_ts_raw} > ${do_wp_raw})
+      OR  (${discharge_order_ts_raw} is not null and ${do_wp_raw} is null )
+    ;;
+  }
+
+  dimension: is_pending_discharge_order {
+    type: yesno
+    sql:
+          (${discharge_order_ts_raw} is null and ${do_wp_raw} is not null)
+      OR  (${discharge_order_ts_raw} is not null and ${do_rtd_raw} is null )
+    ;;
+  }
+
+  dimension_group: pending_discharge_ts {
+    type: time
+    timeframes: [
+      raw,
+      time,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    sql:
+      case
+        when ${discharge_order_ts_raw} is not null and ${do_wp_raw} is not null and ${discharge_order_ts_raw} > ${do_wp_raw} then null
+        when ${do_rtd_raw} is not null then convert(varchar, ${do_rtd_raw}, 126)
+        else convert(varchar,${do_wp_raw}, 126)
+      end
+    ;;
   }
 
 #######################

@@ -7,7 +7,7 @@ view: beds {
 
   dimension: facility {
     type: string
-    sql: ${TABLE}.facility ;;
+    sql: rtrim(${TABLE}.facility) ;;
   }
 
   dimension: room_overflow {
@@ -15,16 +15,34 @@ view: beds {
     sql: ${TABLE}.roomOverflow ;;
   }
 
-  dimension: roombed {
-    label: "Room Bed"
+  dimension: bed {
     type: string
-    sql: ${TABLE}.roombed ;;
+    sql: ${TABLE}.roomBed ;;
   }
 
-  dimension: roomname {
-    label: "Room Name"
+  dimension: unit {
     type: string
-    sql: ${TABLE}.roomname ;;
+    sql: ${TABLE}.roomLoc ;;
+  }
+
+  dimension: room {
+    type: string
+    sql: ${TABLE}.roomName ;;
+  }
+
+  dimension: status {
+    type: string
+    sql: ${TABLE}.roomstate ;;
+  }
+
+  dimension: blocked_reason {
+    type: string
+    sql: ${TABLE}.evsreason ;;
+  }
+
+  dimension: blocked_reason_comment {
+    type: string
+    sql: ${TABLE}.evscomment ;;
   }
 
   dimension_group: timestamp {
@@ -48,6 +66,23 @@ view: beds {
 #######################
 ### Derived Dimensions
 #######################
+
+## Simple changes
+
+  dimension: mnemonic {
+    type: string
+    sql: ${facility} ;;
+  }
+
+  dimension: bed_id {
+    type: string
+    sql: concat(${room}, '-', ${bed}) ;;
+  }
+
+  dimension: name {
+    type: string
+    sql: ${bed_id} ;;
+  }
 
 #######################
 ### Measures
