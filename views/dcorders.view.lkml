@@ -139,8 +139,33 @@ view: dcorders {
     ;;
   }
 
+  dimension_group: current_time {
+    type: time
+    timeframes: [
+      raw
+    ]
+    sql: CURRENT_TIMESTAMP ;;
+  }
+
+  dimension_group: pending_until_departure {
+    type: duration
+    timeframes: [hour]
+    sql_start: ${current_time_raw} ;;
+    sql_end: ${pending_discharge_ts_raw} ;;
+  }
+
 #######################
 ### Measures
 #######################
+
+  measure: total_potential_discharges_today {
+    type: count
+    filters: [hours_pending_until_departure: "<24"]
+  }
+
+  measure: total_potential_discharges_tomorrow {
+    type: count
+    filters: [hours_pending_until_departure: ">24,<48"]
+  }
 
 }

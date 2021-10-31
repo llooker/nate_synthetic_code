@@ -84,6 +84,11 @@ view: beds {
     sql: ${bed_id} ;;
   }
 
+  dimension: is_patient_absent {
+    type: yesno
+    sql: ${pat.patient_row_number} is null ;;
+  }
+
 #######################
 ### Measures
 #######################
@@ -91,5 +96,25 @@ view: beds {
   measure: latest_time {
     type: date_time
     sql: max(${timestamp_time}) ;;
+  }
+
+  measure: total_beds {
+    type: count
+  }
+
+  measure: total_available_beds {
+    type: count
+    filters: [is_patient_absent: "Yes"]
+  }
+
+  measure: total_occupied_beds {
+    type: number
+    sql: ${total_beds} - ${total_available_beds} ;;
+  }
+
+  measure: percent_occupied_beds {
+    type: number
+    sql: ${total_occupied_beds} / nullif(${total_beds},0) ;;
+    value_format_name: percent_1
   }
 }

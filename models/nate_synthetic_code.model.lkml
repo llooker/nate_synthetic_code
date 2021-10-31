@@ -69,6 +69,13 @@ explore: beds_latest_time {
   hidden: yes
   from: beds
   view_name: beds
+
+  # Note: add a cross-join folder and remove this later
+  join: pat {
+    relationship: one_to_one
+    fields: []
+    sql: ;;
+  }
 }
 
 datagroup: nate_synthetic_code_default_datagroup {

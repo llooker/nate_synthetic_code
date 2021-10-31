@@ -281,6 +281,11 @@ view: pat {
     sql: ${covid19_vac_status_text} = 'Partially vaxxed' ;;
   }
 
+  dimension: fully_or_patially_vac {
+    type: yesno
+    sql: ${fully_vac_flag} or ${partially_vac_flag} ;;
+  }
+
   dimension: not_vac_flag {
     type: yesno
     sql: ${covid19_vac_status_text} = 'Not vaxxed' ;;
@@ -357,6 +362,28 @@ view: pat {
     sql: substring(${pat_name}, CHARINDEX(',',${pat_name})+1, LEN(${pat_name})) ;;
   }
 
+### Unsure dimensions
+
+  dimension: covid_status {
+    type: string
+    sql: 'unknown' ;;
+  }
+
+  dimension: is_covid_positive {
+    type: yesno
+    sql: ${covid_status} = 'Positive' ;;
+  }
+
+  dimension: encounter_type {
+    type: string
+    sql: 'unknown' ;;
+  }
+
+  dimension: is_ed {
+    type: yesno
+    sql: ${encounter_type} = 'ED' ;;
+  }
+
 #######################
 ### Measures
 #######################
@@ -364,5 +391,31 @@ view: pat {
   measure: max_last_update {
     type: time
     sql: max(${last_update_raw}) ;;
+  }
+
+  measure: total_known_patients_vaccinated {
+    type: count
+    filters: [fully_or_patially_vac: "Yes"]
+  }
+
+  measure: total_covid_positive_known_vaccinated {
+    type: count
+    filters: [is_covid_positive: "Yes", fully_vac_flag: "Yes"]
+  }
+
+  measure: total_covid_positive {
+    type: count
+    filters: [is_covid_positive: "Yes"]
+  }
+
+  measure: percent_covid_positive_known_vaccinated {
+    type: number
+    sql: ${total_covid_positive_known_vaccinated} / nullif(${total_covid_positive},0) ;;
+    value_format_name: percent_1
+  }
+
+  measure: total_ed_patients {
+    type: count
+    filters: [is_ed: "Yes"]
   }
 }
