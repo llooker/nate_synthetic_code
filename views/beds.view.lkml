@@ -75,6 +75,7 @@ view: beds {
   }
 
   dimension: bed_id {
+    primary_key: yes
     type: string
     sql: concat(${room}, '-', ${bed}) ;;
   }
